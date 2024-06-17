@@ -1,0 +1,6 @@
+data/*
+img/*
+*.pyc
+*.cfg
+*.csv
+test.py
