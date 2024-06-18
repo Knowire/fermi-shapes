@@ -27,6 +27,9 @@ def make_ref_fig(T, P_e, P_nu, P_e_ref, P_nu_ref):
     row1[2].set_xlim(left=1.7)
     row1[0].legend(); row1[1].legend(); row1[2].legend()
 
+    row2[0].axhline(0, color='lightgray', linestyle='-')
+    row2[1].axhline(0, color='lightgray', linestyle='-')
+    row2[2].axhline(0, color='lightgray', linestyle='-')
     row2[0].plot(T, P_e-P_e_ref, label='różnica P_e-')
     row2[1].plot(T, P_nu-P_nu_ref,  label='różnica P_nu')
     row2[2].plot(T, neutrino_cs(T)*(P_nu-P_nu_ref), label='różnica sigma*P_nu')
