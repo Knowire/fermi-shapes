@@ -56,29 +56,34 @@ with open(DECAY_PATH) as f:
 nuclide_files = decay.findall('NuclideFile')
 directory = path.dirname(DECAY_PATH)
 
-start_level, stop_level = decay.find('StartLevel'), decay.find('StopLevel')
+start_level = decay.find('StartLevel')
 start_Z, start_A = start_level.attrib['AtomicNumber'], start_level.attrib['AtomicMass']
-stop_Z, stop_A = stop_level.attrib['AtomicNumber'], stop_level.attrib['AtomicMass']
 
 nuclide1, nuclide2 = None, None
 for nf in nuclide_files:
     nuclide = ET.parse( path.join(directory, nf.attrib['FileName']) ).getroot()
     nuclide_Z, nuclide_A = nuclide.attrib['AtomicNumber'], nuclide.attrib['AtomicMass']
-    if (start_Z, start_A) == (nuclide_Z, nuclide_A): nuclide_file1, nuclide1 = nf, nuclide
-    elif (stop_Z, stop_A) == (nuclide_Z, nuclide_A): nuclide_file2, nuclide2 = nf, nuclide
-    if None not in (nuclide1, nuclide2): break
-if None in (nuclide1, nuclide2):
-    parser.error('atomic numbers in Decay and Nuclide files don\'t match')
+    if (start_Z, start_A) == (nuclide_Z, nuclide_A): nuclide_file1, nuclide1 = nf, nuclide; break
+if nuclide1 is None:
+    parser.error('parent/mother (StartLevel) nuclide file not found')
+
+BETA_PLUS = nuclide1.find('Level').find('Transition').attrib['Type'] != 'B-'
+stop_Z, stop_A = str(int(start_Z)-1) if BETA_PLUS else str(int(start_Z)+1), start_A
+nuclide_files.remove(nuclide_file1)
+
+for nf in nuclide_files:
+    nuclide = ET.parse( path.join(directory, nf.attrib['FileName']) ).getroot()
+    nuclide_Z, nuclide_A = nuclide.attrib['AtomicNumber'], nuclide.attrib['AtomicMass']
+    if (stop_Z, stop_A) == (nuclide_Z, nuclide_A): nuclide_file2, nuclide2 = nf, nuclide; break
+if nuclide2 is None:
+    parser.error('child/daughter nuclide file not found')
 
 if REF:
-    ref_nuclide1 = ET.parse( path.join(directory, nuclide_file1.attrib['RefFileName']) ).getroot()
-    ref_nuclide2 = ET.parse( path.join(directory, nuclide_file2.attrib['RefFileName']) ).getroot()
-
-Z_diff = int(start_Z)-int(stop_Z)
-if Z_diff == -1: BETA_PLUS = False
-elif Z_diff == 1: BETA_PLUS = True
-else: parser.error('incorrect atomic numbers (difference not equal 1)')
-
+    try:
+        ref_nuclide1 = ET.parse( path.join(directory, nuclide_file1.attrib['RefFileName']) ).getroot()
+        ref_nuclide2 = ET.parse( path.join(directory, nuclide_file2.attrib['RefFileName']) ).getroot()
+    except:
+        parser.error('RefFileName attributes not set, or specified files not found')
 
 # analyse ==============================================================================
 import numpy as np
