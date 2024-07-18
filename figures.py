@@ -10,9 +10,10 @@ def neutrino_cs(T):
     result[s] = fit(T[s])
     return result
 
-def make_ref_fig(T, P_e, P_nu, P_e_ref, P_nu_ref):
+def make_ref_fig(T, P_e, P_nu, P_e_ref, P_nu_ref, file_paths):
     fig, axs = plt.subplots(2, 3)
     row1, row2 = axs[0], axs[1]
+    fig.subplots_adjust(top=0.85)
 
     row1[0].plot(T, P_e, label='P_e-')
     row1[1].plot(T, P_nu,  label='P_nu')
@@ -40,11 +41,13 @@ def make_ref_fig(T, P_e, P_nu, P_e_ref, P_nu_ref):
     row2[2].set_xlim(left=1.7)
     row2[0].legend(); row2[1].legend(); row2[2].legend()
 
+    fig.suptitle('\n'.join(file_paths), horizontalalignment='left', x=0.1)
     fig.set_size_inches(15, 8)
     return fig
 
-def make_fig(T, P_e, P_nu):
+def make_fig(T, P_e, P_nu, file_paths):
     fig, row1 = plt.subplots(1, 3)
+    fig.subplots_adjust(top=0.8)
 
     row1[0].plot(T, P_e, label='P_e-')
     row1[1].plot(T, P_nu,  label='P_nu')
@@ -56,5 +59,6 @@ def make_fig(T, P_e, P_nu):
     row1[2].set_xlim(left=1.7)
     row1[0].legend(); row1[1].legend(); row1[2].legend()
 
+    fig.suptitle('\n'.join(file_paths), horizontalalignment='left', x=0.1)
     fig.set_size_inches(15, 4)
     return fig

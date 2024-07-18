@@ -61,9 +61,10 @@ start_Z, start_A = start_level.attrib['AtomicNumber'], start_level.attrib['Atomi
 
 nuclide1, nuclide2 = None, None
 for nf in nuclide_files:
-    nuclide = ET.parse( path.join(directory, nf.attrib['FileName']) ).getroot()
+    nf_path = path.join(directory, nf.attrib['FileName'])
+    nuclide = ET.parse( nf_path ).getroot()
     nuclide_Z, nuclide_A = nuclide.attrib['AtomicNumber'], nuclide.attrib['AtomicMass']
-    if (start_Z, start_A) == (nuclide_Z, nuclide_A): nuclide_file1, nuclide1 = nf, nuclide; break
+    if (start_Z, start_A) == (nuclide_Z, nuclide_A): nuclide_file1, nuclide_file_path1, nuclide1 = nf, nf_path, nuclide; break
 if nuclide1 is None:
     parser.error('parent/mother (StartLevel) nuclide file not found')
 
@@ -72,16 +73,21 @@ stop_Z, stop_A = str(int(start_Z)-1) if BETA_PLUS else str(int(start_Z)+1), star
 nuclide_files.remove(nuclide_file1)
 
 for nf in nuclide_files:
-    nuclide = ET.parse( path.join(directory, nf.attrib['FileName']) ).getroot()
+    nf_path = path.join(directory, nf.attrib['FileName'])
+    nuclide = ET.parse( nf_path ).getroot()
     nuclide_Z, nuclide_A = nuclide.attrib['AtomicNumber'], nuclide.attrib['AtomicMass']
-    if (stop_Z, stop_A) == (nuclide_Z, nuclide_A): nuclide_file2, nuclide2 = nf, nuclide; break
+    if (stop_Z, stop_A) == (nuclide_Z, nuclide_A): nuclide_file2, nuclide_file_path2, nuclide2 = nf, nf_path, nuclide; break
 if nuclide2 is None:
     parser.error('child/daughter nuclide file not found')
 
+paths = [DECAY_PATH, nuclide_file_path1, nuclide_file_path2]
+
 if REF:
     try:
-        ref_nuclide1 = ET.parse( path.join(directory, nuclide_file1.attrib['RefFileName']) ).getroot()
-        ref_nuclide2 = ET.parse( path.join(directory, nuclide_file2.attrib['RefFileName']) ).getroot()
+        ref_nuclide_file_path1 = path.join(directory, nuclide_file1.attrib['RefFileName'])
+        ref_nuclide_file_path2 = path.join(directory, nuclide_file2.attrib['RefFileName'])
+        ref_nuclide1, ref_nuclide2 = ET.parse( ref_nuclide_file_path1 ).getroot(), ET.parse( ref_nuclide_file_path2 ).getroot()
+        paths += [ref_nuclide_file_path1, ref_nuclide_file_path2]
     except:
         parser.error('RefFileName attributes not set, or specified files not found')
 
@@ -135,7 +141,7 @@ ref_P_e, ref_P_nu = analyse(ref_nuclide1, ref_nuclide2) if REF else (None, None)
 if PLOT:
     import matplotlib.pyplot as plt
     from figures import make_ref_fig, make_fig
-    fig = make_ref_fig(T, P_e, P_nu, ref_P_e, ref_P_nu) if REF else make_fig(T, P_e, P_nu)
+    fig = make_ref_fig(T, P_e, P_nu, ref_P_e, ref_P_nu, paths) if REF else make_fig(T, P_e, P_nu, paths)
     plt.show()
 else:
     import csv
