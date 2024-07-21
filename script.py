@@ -16,6 +16,7 @@ parser.add_argument('--all-allowed', action='store_true', help='if chosen, every
 parser.add_argument('-r', '--use-ref', action='store_true', help='if chosen, use reference files')
 group.add_argument('--binsize', type=float, help=f'bin size in MeV (float), default is {DEFAULT_BINSIZE}')
 group.add_argument('--datalen', type=int, help='number of bins (int)')
+group.add_argument('-o', '--output', help='output file path')
 args = parser.parse_args()
 
 if not path.exists(args.filepath):
@@ -33,7 +34,7 @@ else:
 if path.splitext(DECAY_PATH)[-1].lower() != '.xml':
     parser.error('wrong decay file extension - should be xml')
 
-OUTPUT_PATH = config.get('Basic', 'output_file_path', fallback='out.csv')
+OUTPUT_PATH = args.output or config.get('Basic', 'output_file_path', fallback='out.csv')
 PLOT = args.plot or config.getboolean('Basic', 'plot', fallback=False)
 USE_FORBIDDEN = False if args.all_allowed else config.getboolean('Basic', 'use_forbidden', fallback=True)
 REF = args.use_ref or config.getboolean('Basic', 'use_reference_files', fallback=False)
