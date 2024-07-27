@@ -98,9 +98,11 @@ from fermi import FermiBeta
 
 def get_transition_type(sp1, sp2, par1, par2):
     if sp1 and sp2:
-        is_parity_changed = par1!=par2
-        spin_delta = int(np.abs(float(sp1)-float(sp2)))
-        return (spin_delta, is_parity_changed)
+        sp1, sp2 = float(sp1), float(sp2)
+        if sp1>=0 and sp2>=0:
+            is_parity_changed = par1!=par2
+            spin_delta = int(np.abs( sp1-sp2 ))
+            return (spin_delta, is_parity_changed)
     else:
         return None
 

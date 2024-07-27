@@ -3,4 +3,4 @@ img/*
 *.pyc
 *.cfg
 *.csv
-test.py
+test*.py
