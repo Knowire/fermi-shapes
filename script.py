@@ -8,15 +8,15 @@ DEFAULT_BINSIZE = 0.001 # MeV
 
 # parse args and config
 parser = ArgumentParser()
-group = parser.add_mutually_exclusive_group()
+group1, group2 = parser.add_mutually_exclusive_group(), parser.add_mutually_exclusive_group() 
 parser.add_argument('filepath', help='path to decay file, or config if --config-mode')
 parser.add_argument('-c', '--config-mode', action='store_true', help='if specified, then filepath leads to config')
-parser.add_argument('-p', '--plot', action='store_true', help='whether to plot result at the end of run')
 parser.add_argument('--all-allowed', action='store_true', help='if chosen, every transition is treated as allowed')
 parser.add_argument('-r', '--use-ref', action='store_true', help='if chosen, use reference files')
-group.add_argument('--binsize', type=float, help=f'bin size in MeV (float), default is {DEFAULT_BINSIZE}')
-group.add_argument('--datalen', type=int, help='number of bins (int)')
-group.add_argument('-o', '--output', help='output file path')
+group1.add_argument('--binsize', type=float, help=f'bin size in MeV (float), default is {DEFAULT_BINSIZE}')
+group1.add_argument('--datalen', type=int, help='number of bins (int)')
+group2.add_argument('-p', '--plot', action='store_true', help='whether to plot result at the end of run')
+group2.add_argument('-o', '--output', help='output file path')
 args = parser.parse_args()
 
 if not path.exists(args.filepath):
@@ -138,8 +138,16 @@ def analyse(nuc1, nuc2):
 
     return P_e, P_nu
 
+
+from figures import neutrino_cs
+
 P_e, P_nu = analyse(nuclide1, nuclide2)
-ref_P_e, ref_P_nu = analyse(ref_nuclide1, ref_nuclide2) if REF else (None, None)
+cs_P_nu = neutrino_cs(T)*P_nu
+
+if REF:
+    ref_P_e, ref_P_nu = analyse(ref_nuclide1, ref_nuclide2)
+    ref_cs_P_nu = neutrino_cs(T)*ref_P_nu
+
 
 if PLOT:
     import matplotlib.pyplot as plt
@@ -149,8 +157,8 @@ if PLOT:
 else:
     import csv
     with open(OUTPUT_PATH, 'w', newline='') as csvfile:
-        rows = zip(T, P_e, P_nu, ref_P_e, ref_P_nu) if REF else zip(T, P_e, P_nu)
-        fieldnames = ['T', 'P_e', 'P_nu', 'ref_P_e', 'ref_P_nu'] if REF else ['T', 'P_e', 'P_nu']
+        rows = zip(T, P_e, P_nu, cs_P_nu, ref_P_e, ref_P_nu, ref_cs_P_nu) if REF else zip(T, P_e, P_nu, cs_P_nu)
+        fieldnames = ['T', 'P_e', 'P_nu', 'cs_P_nu', 'ref_P_e', 'ref_P_nu', 'ref_cs_P_nu'] if REF else ['T', 'P_e', 'P_nu', 'cs_P_nu']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for row_tuple in rows:
