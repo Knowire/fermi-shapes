@@ -1,14 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
-def neutrino_cs(T):
-    # neutrino cross-section
-    T_min = 1.806
-    fit = lambda x: 6.56706866e-44 - 1.92856195e-43*x + 8.66520979e-44*x*x
-    result = np.zeros(len(T))
-    s = T>=T_min
-    result[s] = fit(T[s])
-    return result
+from utils import neutrino_cs
 
 def make_ref_fig(T, P_e, P_nu, P_e_ref, P_nu_ref, file_paths):
     fig, axs = plt.subplots(2, 3)

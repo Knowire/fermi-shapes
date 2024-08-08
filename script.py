@@ -95,6 +95,14 @@ if REF:
 # analyse ==============================================================================
 import numpy as np
 from fermi import FermiBeta
+from utils import neutrino_cs
+
+Z = float(nuclide1.attrib['AtomicNumber'])
+A = float(nuclide1.attrib['AtomicMass'])
+T_max = float(nuclide1.attrib['QBeta'])/1000 # MeV
+
+beta_decay = FermiBeta(Z, A, BETA_PLUS)
+T = np.linspace(0, T_max, DATALEN) if DATALEN else np.arange(0, T_max, BINSIZE or DEFAULT_BINSIZE)
 
 def get_transition_type(sp1, sp2, par1, par2):
     if sp1 and sp2:
@@ -105,13 +113,6 @@ def get_transition_type(sp1, sp2, par1, par2):
             return (spin_delta, is_parity_changed)
     else:
         return None
-
-Z = float(nuclide1.attrib['AtomicNumber'])
-A = float(nuclide1.attrib['AtomicMass'])
-T_max = float(nuclide1.attrib['QBeta'])/1000 # MeV
-
-beta_decay = FermiBeta(Z, A, BETA_PLUS)
-T = np.linspace(0, T_max, DATALEN) if DATALEN else np.arange(0, T_max, BINSIZE or DEFAULT_BINSIZE)
 
 def analyse(nuc1, nuc2):
     P_e, P_nu = np.zeros(len(T)), np.zeros(len(T))
@@ -139,15 +140,11 @@ def analyse(nuc1, nuc2):
     return P_e, P_nu
 
 
-from figures import neutrino_cs
-
 P_e, P_nu = analyse(nuclide1, nuclide2)
 cs_P_nu = neutrino_cs(T)*P_nu
-
 if REF:
     ref_P_e, ref_P_nu = analyse(ref_nuclide1, ref_nuclide2)
     ref_cs_P_nu = neutrino_cs(T)*ref_P_nu
-
 
 if PLOT:
     import matplotlib.pyplot as plt
