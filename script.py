@@ -139,23 +139,26 @@ def analyse(nuc1, nuc2):
 
     return P_e, P_nu
 
-
-P_e, P_nu = analyse(nuclide1, nuclide2)
-cs_P_nu = neutrino_cs(T)*P_nu
+# BETA_PLUS = True
+columns = {}
+columns['P_e'], columns['P_nu'] = analyse(nuclide1, nuclide2)
+if not BETA_PLUS:
+    columns['cs_P_nu'] = neutrino_cs(T)*columns['P_nu']
 if REF:
-    ref_P_e, ref_P_nu = analyse(ref_nuclide1, ref_nuclide2)
-    ref_cs_P_nu = neutrino_cs(T)*ref_P_nu
+    columns['ref_P_e'], columns['ref_P_nu'] = analyse(ref_nuclide1, ref_nuclide2)
+    if not BETA_PLUS:
+        columns['ref_cs_P_nu'] = neutrino_cs(T)*columns['ref_P_nu']
 
 if PLOT:
     import matplotlib.pyplot as plt
     from figures import make_ref_fig, make_fig
-    fig = make_ref_fig(T, P_e, P_nu, ref_P_e, ref_P_nu, paths) if REF else make_fig(T, P_e, P_nu, paths)
+    fig = make_ref_fig(T, *columns.values(), file_paths=paths) if REF else make_fig(T, columns['P_e'], columns['P_nu'], paths)
     plt.show()
 else:
     import csv
     with open(OUTPUT_PATH, 'w', newline='') as csvfile:
-        rows = zip(T, P_e, P_nu, cs_P_nu, ref_P_e, ref_P_nu, ref_cs_P_nu) if REF else zip(T, P_e, P_nu, cs_P_nu)
-        fieldnames = ['T', 'P_e', 'P_nu', 'cs_P_nu', 'ref_P_e', 'ref_P_nu', 'ref_cs_P_nu'] if REF else ['T', 'P_e', 'P_nu', 'cs_P_nu']
+        rows = zip(T, *columns.values())
+        fieldnames = ['T', *columns.keys()]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         for row_tuple in rows:
