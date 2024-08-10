@@ -139,7 +139,7 @@ def analyse(nuc1, nuc2):
 
     return P_e, P_nu
 
-# BETA_PLUS = True
+
 columns = {}
 columns['P_e'], columns['P_nu'] = analyse(nuclide1, nuclide2)
 if not BETA_PLUS:
@@ -152,7 +152,7 @@ if REF:
 if PLOT:
     import matplotlib.pyplot as plt
     from figures import make_ref_fig, make_fig
-    fig = make_ref_fig(T, *columns.values(), file_paths=paths) if REF else make_fig(T, columns['P_e'], columns['P_nu'], paths)
+    fig = make_ref_fig(T, *columns.values(), file_paths=paths) if REF else make_fig(T, *columns.values(), file_paths=paths)
     plt.show()
 else:
     import csv
